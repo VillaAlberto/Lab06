@@ -10,6 +10,7 @@ public class TestModel {
 		
 		System.out.println(m.trovaSequenza(5));
 		
+		
 
 	}
 
