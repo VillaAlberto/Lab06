@@ -14,6 +14,7 @@ public class Model {
 	private MeteoDAO DAO = new MeteoDAO();
 	private List<Rilevamento> bestSoluzione;
 	private int bestPunteggio;
+	int counter = 0;
 
 	public Model() {
 		bestSoluzione = null;
@@ -47,9 +48,7 @@ public class Model {
 
 		List<Citta> listaCitta = new LinkedList<Citta>();
 		List<Rilevamento> parziale = new LinkedList<Rilevamento>();
-		int livello = 1;
-
-		ricorsiva(livello, parziale, listaCitta);
+		int livello = 0;
 		// Ottengo una lista con tutte le città e per ognuna NUMERO_GIORNI_TOTALI di
 		// rilevazioni
 		for (String localita : DAO.getAllLocalita()) {
@@ -57,6 +56,7 @@ public class Model {
 					new Citta(localita, DAO.getQuindiciRilevamentiLocalitaMese(mese, localita, NUMERO_GIORNI_TOTALI)));
 		}
 
+		ricorsiva(livello, parziale, listaCitta);
 		String result = "";
 		for (Rilevamento r : bestSoluzione) {
 			result += r.getLocalita() + "\n";
@@ -66,14 +66,27 @@ public class Model {
 	}
 
 	private void ricorsiva(int livello, List<Rilevamento> parziale, List<Citta> listaCitta) {
+
 		for (Citta c : listaCitta) {
 			if (c.getCounter() > NUMERO_GIORNI_CITTA_MAX) {
 				return;
 			}
 		}
 
+		int contatore = 0;
+		for (Rilevamento r : parziale) {
+			if (parziale.indexOf(r)>1&&r.getLocalita().compareTo(parziale.get(parziale.indexOf(r)-1).getLocalita()) != 0) {
+				contatore = 0;
+			} else {
+				contatore++;
+			}
+			if (contatore == NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN) {
+				return;
+			}
+		}
+
 		if (livello == NUMERO_GIORNI_TOTALI) {
-			System.out.println("KNOPPA");
+			System.out.println(counter++);
 			int costo = calcolaCosto(parziale);
 			if (costo < bestPunteggio) {
 				bestSoluzione = new LinkedList<Rilevamento>(parziale);
@@ -83,18 +96,13 @@ public class Model {
 		}
 
 		for (Citta c : listaCitta) {
-			for (int i = 0; i < NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN; i++) {
-				parziale.add(c.getRilevamenti().get(livello));
-				c.increaseCounter();
-			}
-			ricorsiva(livello + NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN, parziale, listaCitta);
-
+			parziale.add(c.getRilevamenti().get(livello));
+			c.increaseCounter();
+			ricorsiva(livello + 1, parziale, listaCitta);
 			// backtracking
-			for (int i = 0; i < NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN; i++) {
-				parziale.remove(livello - NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN + i);
-			}
-			c.setCounter(c.getCounter() - NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN);
 
+			parziale.remove(parziale.size() - 1);
+			c.setCounter(c.getCounter() - 1);
 		}
 	}
 
@@ -102,7 +110,7 @@ public class Model {
 		int costo = 0;
 		for (Rilevamento r : parziale) {
 			costo += r.getUmidita();
-			if (r.getLocalita().compareTo(parziale.get(parziale.indexOf(r) - 1).getLocalita()) != 0) {
+			if (parziale.indexOf(r)>1&&r.getLocalita().compareTo(parziale.get(parziale.indexOf(r)-1).getLocalita()) != 0) {
 				costo += COST;
 			}
 		}
