@@ -16,6 +16,7 @@ public class Model {
 	private int bestPunteggio;
 
 	private MeteoDAO DAO;
+	int counter = 0;
 
 	public Model() {
 		DAO = new MeteoDAO();
@@ -47,7 +48,8 @@ public class Model {
 		// Per ogni città ho i suoi 15 rilevamenti
 		List<Citta> listaCitta = new LinkedList<Citta>();
 		for (String localita : DAO.getAllLocalita()) {
-			listaCitta.add(new Citta(localita, DAO.getQuindiciRilevamentiLocalitaMese(mese, localita, NUMERO_GIORNI_TOTALI)));
+			listaCitta.add(
+					new Citta(localita, DAO.getQuindiciRilevamentiLocalitaMese(mese, localita, NUMERO_GIORNI_TOTALI)));
 		}
 
 		List<Rilevamento> parziale = new LinkedList<Rilevamento>();
@@ -72,12 +74,18 @@ public class Model {
 		}
 
 		// condizione terminale
-		if (livello == NUMERO_GIORNI_TOTALI /*&& AlmenoGiorniMin(parziale)*/) {
+		if (livello >= NUMERO_GIORNI_TOTALI) {
+			
+			if (AlmenoGiorniMin(parziale))
 			// migliore della bestSoluzione?
-			int costo = calcolaCosto(parziale);
-			if (costo < bestPunteggio) {
-				bestSoluzione = new LinkedList<Rilevamento>(parziale);
-				bestPunteggio = costo;
+			{
+//				System.out.println(counter++);
+//				System.out.println(parziale);
+				int costo = calcolaCosto(parziale);
+				if (costo < bestPunteggio) {
+					bestSoluzione = new LinkedList<Rilevamento>(parziale);
+					bestPunteggio = costo;
+				}
 			}
 			return;
 		}
@@ -100,12 +108,10 @@ public class Model {
 			if (parziale.get(0).getLocalita().compareTo(parziale.get(i).getLocalita()) != 0)
 				return false;
 		}
-		
-		for (int i=NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN; i<NUMERO_GIORNI_TOTALI-1; i++)
-		{
-			if (!parziale.get(i+1).equals(parziale.get(i)))
-			{
-				if (!parziale.get(i).equals(parziale.get(i-1))||!parziale.get(i).equals(parziale.get(i-2)))
+
+		for (int i = 2; i < NUMERO_GIORNI_TOTALI - 1; i++) {
+			if (!parziale.get(i + 1).equals(parziale.get(i))) {
+				if (!parziale.get(i).equals(parziale.get(i - 1)) || !parziale.get(i).equals(parziale.get(i - 2)))
 					return false;
 			}
 		}
