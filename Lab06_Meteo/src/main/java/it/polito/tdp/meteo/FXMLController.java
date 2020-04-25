@@ -40,7 +40,13 @@ public class FXMLController {
 
     @FXML
     void doCalcolaSequenza(ActionEvent event) {
-
+    	try { 
+    		txtResult.setText(model.trovaSequenza(boxMese.getValue()));
+    	}
+    	catch(Exception e) {
+    		txtResult.setText("Errore SQL");
+    		e.printStackTrace();
+    	}
     }
 
     @FXML

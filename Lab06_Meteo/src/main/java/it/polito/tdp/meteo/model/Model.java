@@ -44,7 +44,7 @@ public class Model {
 
 	// of course you can change the String output with what you think works best
 	public String trovaSequenza(int mese) {
-
+		bestPunteggio=2000;
 		// Per ogni città ho i suoi 15 rilevamenti
 		List<Citta> listaCitta = new LinkedList<Citta>();
 		for (String localita : DAO.getAllLocalita()) {
