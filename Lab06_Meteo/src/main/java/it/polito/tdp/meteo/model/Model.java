@@ -58,8 +58,9 @@ public class Model {
 		ricorsiva(livello, parziale, listaCitta);
 
 		String result = "";
+		System.out.println(bestPunteggio);
 		for (Rilevamento r : bestSoluzione) {
-			result += r.getLocalita() + "\n";
+			result += r.getLocalita() + r.getUmidita() + "\n";
 		}
 
 		return result;
@@ -75,7 +76,7 @@ public class Model {
 
 		// condizione terminale
 		if (livello >= NUMERO_GIORNI_TOTALI) {
-			
+
 			if (AlmenoGiorniMin(parziale))
 			// migliore della bestSoluzione?
 			{
@@ -105,7 +106,8 @@ public class Model {
 		// Se ne trova 1 o 2 da soli rimanda false
 
 		for (int i = 0; i < NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN; i++) {
-			if (parziale.get(0).getLocalita().compareTo(parziale.get(i).getLocalita()) != 0)
+			if (parziale.get(0).getLocalita().compareTo(parziale.get(i).getLocalita()) != 0
+					|| !parziale.get(NUMERO_GIORNI_TOTALI - 1).equals(parziale.get(NUMERO_GIORNI_TOTALI - 1 - i)))
 				return false;
 		}
 
@@ -121,12 +123,18 @@ public class Model {
 
 	private int calcolaCosto(List<Rilevamento> parziale) {
 		int costo = 0;
-		for (Rilevamento r : parziale) {
-			costo += r.getUmidita();
-			if (parziale.indexOf(r) > 1
-					&& r.getLocalita().compareTo(parziale.get(parziale.indexOf(r) - 1).getLocalita()) != 0) {
+		// citta lastCity = citta[0]
+//		for (Rilevamento r : parziale) {
+//			costo += r.getUmidita();
+//			// if citta[i] != lastCity {costo+=COST} else {lastCity = citta[i]};
+//			if (parziale.indexOf(r) > 0 && !r.equals(parziale.get(parziale.indexOf(r)-1))) {
+//				costo += COST;
+//			}
+//		}
+		for (int i = 0; i < NUMERO_GIORNI_TOTALI; i++) {
+			costo += parziale.get(i).getUmidita();
+			if (i != 0 && !parziale.get(i).equals(parziale.get(i - 1)))
 				costo += COST;
-			}
 		}
 		return costo;
 	}
